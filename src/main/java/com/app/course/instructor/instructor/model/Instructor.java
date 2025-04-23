@@ -1,51 +1,46 @@
 package com.app.course.instructor.instructor.model;
 
-
 public class Instructor {
-    private String id;
     private String firstName;
     private String lastName;
     private String dob;
     private String gender;
     private String nationality;
     private String nic;
-    private String profilePic; // store as path or base64 string
+    private String profilePicture;
     private String phone;
     private String qualification;
-    private String expertise;
+    private String specialization;
     private int experience;
     private String department;
     private String designation;
     private String email;
     private String password;
 
-    public Instructor(String id, String firstName, String lastName, String dob, String gender, String nationality,
-                      String nic, String profilePic, String phone, String qualification, String expertise,
-                      int experience, String department, String designation, String email, String password) {
-        this.id = id;
+    public Instructor() {
+    }
+
+    public Instructor(String firstName, String lastName, String dob,
+                      String gender, String nationality, String nic,
+                      String profilePicture, String phone, String qualification,
+                      String specialization, int experience, String department,
+                      String designation, String email, String password)
+    {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dob = dob;
         this.gender = gender;
         this.nationality = nationality;
         this.nic = nic;
-        this.profilePic = profilePic;
+        this.profilePicture = profilePicture;
         this.phone = phone;
         this.qualification = qualification;
-        this.expertise = expertise;
+        this.specialization = specialization;
         this.experience = experience;
         this.department = department;
         this.designation = designation;
         this.email = email;
         this.password = password;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getFirstName() {
@@ -96,12 +91,12 @@ public class Instructor {
         this.nic = nic;
     }
 
-    public String getProfilePic() {
-        return profilePic;
+    public String getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setProfilePic(String profilePic) {
-        this.profilePic = profilePic;
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public String getPhone() {
@@ -120,12 +115,12 @@ public class Instructor {
         this.qualification = qualification;
     }
 
-    public String getExpertise() {
-        return expertise;
+    public String getSpecialization() {
+        return specialization;
     }
 
-    public void setExpertise(String expertise) {
-        this.expertise = expertise;
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
     }
 
     public int getExperience() {
@@ -168,4 +163,6 @@ public class Instructor {
         this.password = password;
     }
 }
+
+
 

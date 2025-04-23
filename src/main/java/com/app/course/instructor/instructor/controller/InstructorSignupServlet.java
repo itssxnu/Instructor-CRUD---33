@@ -1,44 +1,60 @@
 package com.app.course.instructor.instructor.controller;
 
-import com.app.course.instructor.instructor.model.Instructor;
 import com.app.course.instructor.instructor.dao.InstructorDAO;
+import com.app.course.instructor.instructor.model.Instructor;
 
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.util.UUID;
+import jakarta.servlet.annotation.*;
 
-@WebServlet("/InstructorSignupServlet")
+import java.io.*;
+
+@WebServlet("/instructorSignup")
+@MultipartConfig
 public class InstructorSignupServlet extends HttpServlet {
+    private InstructorDAO instructorDAO;
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    @Override
+    public void init() {
+        String path = getServletContext().getRealPath("/") + "data/instructors.txt";
+        instructorDAO = new InstructorDAO(path);
+    }
 
-        String id = UUID.randomUUID().toString();  // Generate unique ID
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        Instructor instructor = new Instructor();
 
-        Instructor instructor = new Instructor(
-                id,
-                request.getParameter("firstName"),
-                request.getParameter("lastName"),
-                request.getParameter("dob"),
-                request.getParameter("gender"),
-                request.getParameter("nationality"),
-                request.getParameter("nic"),
-                request.getParameter("profilePic"),  // You might need file upload logic if it's a real image
-                request.getParameter("phone"),
-                request.getParameter("qualification"),
-                request.getParameter("expertise"),
-                Integer.parseInt(request.getParameter("experience")),
-                request.getParameter("department"),
-                request.getParameter("designation"),
-                request.getParameter("email"),
-                request.getParameter("password")
-        );
+        instructor.setFirstName(request.getParameter("firstName"));
+        instructor.setLastName(request.getParameter("lastName"));
+        instructor.setDob(request.getParameter("dob"));
+        instructor.setGender(request.getParameter("gender"));
+        instructor.setNationality(request.getParameter("nationality"));
+        instructor.setNic(request.getParameter("nic"));
 
-        InstructorDAO dao = new InstructorDAO();
-        dao.saveInstructor(instructor);
+        // File upload (Profile Picture)
+        Part filePart = request.getPart("profilePicture");
+        String fileName = filePart.getSubmittedFileName();
+        String uploadPath = getServletContext().getRealPath("/") + "uploads/";
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) uploadDir.mkdir();
+        filePart.write(uploadPath + fileName);
 
-        response.sendRedirect("instructor-list.jsp");  // or dashboard
+        instructor.setProfilePicture("uploads/" + fileName);
+        instructor.setPhone(request.getParameter("phone"));
+        instructor.setQualification(request.getParameter("qualification"));
+        instructor.setSpecialization(request.getParameter("specialization"));
+        instructor.setExperience(Integer.parseInt(request.getParameter("experience")));
+        instructor.setDepartment(request.getParameter("department"));
+        instructor.setDesignation(request.getParameter("designation"));
+        instructor.setEmail(request.getParameter("email"));
+        instructor.setPassword(request.getParameter("password"));
+
+        boolean success = instructorDAO.registerInstructor(instructor);
+
+        if (success) {
+            response.sendRedirect("instructorLogin.jsp?msg=Registered successfully");
+        } else {
+            response.sendRedirect("instructorSignup.jsp?error=Registration failed");
+        }
     }
 }
-
