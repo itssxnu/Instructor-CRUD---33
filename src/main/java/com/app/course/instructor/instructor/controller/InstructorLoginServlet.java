@@ -3,7 +3,6 @@ package com.app.course.instructor.instructor.controller;
 import com.app.course.instructor.instructor.dao.InstructorDAO;
 import com.app.course.instructor.instructor.model.Instructor;
 
-import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 
@@ -15,8 +14,9 @@ public class InstructorLoginServlet extends HttpServlet {
 
     @Override
     public void init() {
-        String path = getServletContext().getRealPath("/") + "data/instructors.txt";
+        String path = getServletContext().getRealPath("/") + "data\\instructors.txt";
         instructorDAO = new InstructorDAO(path);
+        System.out.println("[InstructorLoginServlet] Instructor file path: " + path);
     }
 
     @Override
@@ -24,14 +24,24 @@ public class InstructorLoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // Basic validation
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            response.sendRedirect("instructorLogin.jsp?error=Email and password are required");
+            return;
+        }
+
         Instructor instructor = instructorDAO.validateLogin(email, password);
 
         if (instructor != null) {
             HttpSession session = request.getSession();
             session.setAttribute("instructor", instructor);
-            response.sendRedirect("instructorDashboard.jsp");
+            response.sendRedirect("instructorDashboard");
         } else {
-            response.sendRedirect("instructorLogin.jsp?error=Invalid credentials");
+            if (instructorDAO.emailExists(email)) {
+                response.sendRedirect("instructorLogin.jsp?error=Invalid password");
+            } else {
+                response.sendRedirect("instructorLogin.jsp?error=Account not found");
+            }
         }
     }
 }

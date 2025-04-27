@@ -39,7 +39,7 @@ public class InstructorSignupServlet extends HttpServlet {
         if (!uploadDir.exists()) uploadDir.mkdir();
         filePart.write(uploadPath + fileName);
 
-        instructor.setProfilePicture("uploads/" + fileName);
+        instructor.setProfilePicture(fileName);
         instructor.setPhone(request.getParameter("phone"));
         instructor.setQualification(request.getParameter("qualification"));
         instructor.setSpecialization(request.getParameter("specialization"));
