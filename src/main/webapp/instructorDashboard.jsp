@@ -48,7 +48,7 @@
     <div class="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow">
         <h1 class="text-2xl font-bold text-indigo-700">Welcome, <%= instructor.getFirstName() %>!</h1>
         <div class="flex space-x-2">
-            <a href="manageInstructor?action=edit"
+            <a href="manageInstructor?action=update"
                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition">
                 Edit Profile
             </a>

@@ -36,10 +36,19 @@ public class InstructorManagementServlet extends HttpServlet {
             return;
         }
 
-        if ("delete".equals(action)) {
-            request.getRequestDispatcher("confirmDelete.jsp").forward(request, response);
+        switch (action) {
+            case "delete":
+                request.getRequestDispatcher("confirmDelete.jsp").forward(request, response);
+                break;
+            case "update":
+                request.getRequestDispatcher("editInstructor.jsp").forward(request, response);
+                break;
+            default:
+                response.sendRedirect("instructorDashboard.jsp");
+                break;
         }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
