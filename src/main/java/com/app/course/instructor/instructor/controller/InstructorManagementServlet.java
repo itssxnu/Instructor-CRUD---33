@@ -5,7 +5,6 @@ import com.app.course.instructor.instructor.model.Instructor;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-
 import java.io.*;
 import java.nio.file.Paths;
 
@@ -36,19 +35,12 @@ public class InstructorManagementServlet extends HttpServlet {
             return;
         }
 
-        switch (action) {
-            case "delete":
-                request.getRequestDispatcher("confirmDelete.jsp").forward(request, response);
-                break;
-            case "update":
-                request.getRequestDispatcher("editInstructor.jsp").forward(request, response);
-                break;
-            default:
-                response.sendRedirect("instructorDashboard.jsp");
-                break;
+        if ("update".equals(action)) {
+            request.getRequestDispatcher("editInstructor.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("instructorDashboard.jsp");
         }
     }
-
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -97,14 +89,6 @@ public class InstructorManagementServlet extends HttpServlet {
             } catch (Exception e) {
                 e.printStackTrace();
                 response.sendRedirect("instructorDashboard?error=Error processing request");
-            }
-        } else if ("delete".equals(action)) {
-            // Handle account deletion
-            if (instructorDAO.deleteInstructor(instructor.getEmail())) {
-                session.invalidate();
-                response.sendRedirect("instructorLogin.jsp?msg=Account deleted successfully");
-            } else {
-                response.sendRedirect("instructorDashboard?error=Failed to delete account");
             }
         }
     }

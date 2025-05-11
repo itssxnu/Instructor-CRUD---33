@@ -1,52 +1,45 @@
 package com.app.course.instructor.instructor.dao;
 
 import com.app.course.instructor.instructor.model.Course;
+import com.app.course.instructor.instructor.model.Student;
+import com.app.course.instructor.instructor.util.InsertionSortUtil;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 public class CourseDAO {
     private final String courseFilePath;
     private final String enrollmentFilePath;
 
+    // Flexible date-time formatter that handles different precisions
+    private static final DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+            .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+            .toFormatter();
+
     public CourseDAO(String courseFilePath, String enrollmentFilePath) {
         this.courseFilePath = courseFilePath;
         this.enrollmentFilePath = enrollmentFilePath;
     }
 
-    public List<Course> getCoursesByInstructor(String email) {
-        List<Course> list = new ArrayList<>();
+    public List<Course> getAllCourses() {
+        List<Course> courses = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(courseFilePath))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split("\\|");
-                if (tokens.length >= 10 && tokens[9].equalsIgnoreCase(email)) {
-                    Course course = new Course(tokens[0], tokens[1]);
-                    list.add(course);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    public List<Course> getAllPredefinedCourses() {
-        List<Course> courses = new ArrayList<>();
-        String predefinedPath = this.courseFilePath.replace("courses.txt", "predefined_courses.txt");
-
-        try (BufferedReader br = new BufferedReader(new FileReader(predefinedPath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\\|");
-                if (tokens.length >= 5) {
+                if (tokens.length >= 6) {
                     courses.add(new Course(
                             tokens[0],  // courseId
                             tokens[1],  // title
                             tokens[2],  // description
-                            tokens[3],  // startDate
-                            tokens[4],  // endDate
-                            ""         // instructorEmail (empty for predefined)
+                            tokens[3],  // price
+                            tokens[4],  // startDate
+                            tokens[5]   // endDate
                     ));
                 }
             }
@@ -56,48 +49,36 @@ public class CourseDAO {
         return courses;
     }
 
-    public boolean assignCourseToInstructor(Course course, String instructorEmail) {
-        course.setInstructorEmail(instructorEmail);
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(courseFilePath, true))) {
-            bw.write(String.join("|",
-                    course.getCourseId(),
-                    course.getTitle(),
-                    course.getDescription(),
-                    course.getStartDate(),
-                    course.getEndDate(),
-                    course.getInstructorEmail()));
-            bw.newLine();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public int countEnrolledStudents(String courseId) {
-        int count = 0;
+    public List<Student> getStudentsForCourse(String courseId) {
+        List<Student> students = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(enrollmentFilePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\\|");
-                if (tokens.length == 2 && tokens[0].equalsIgnoreCase(courseId)) {
-                    count++;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return count;
-    }
+                try {
+                    String[] tokens = line.split(",");
+                    if (tokens.length >= 12) {
+                        // Parse the date with flexible format
+                        LocalDateTime createdAt = LocalDateTime.parse(tokens[4], formatter);
 
-    public List<String> getEnrolledStudents(String courseId) {
-        List<String> students = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(enrollmentFilePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\\|");
-                if (tokens.length == 2 && tokens[1].equals(courseId)) {
-                    students.add(tokens[0]);
+                        Student student = new Student(
+                                tokens[5],  // firstName
+                                tokens[6],  // lastName
+                                tokens[7],  // dateOfBirth
+                                tokens[8],  // gender
+                                tokens[9],  // nationality
+                                tokens[10], // email
+                                tokens[11], // password
+                                tokens[0],  // id
+                                tokens[1],  // contactNumber
+                                tokens[2],  // school
+                                tokens[3],  // grade
+                                createdAt   // createdAt
+                        );
+                        students.add(student);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error parsing student record: " + line);
+                    e.printStackTrace();
                 }
             }
         } catch (IOException e) {
@@ -106,52 +87,41 @@ public class CourseDAO {
         return students;
     }
 
-    public boolean updateCourse(Course updatedCourse) {
-        List<Course> allCourses = new ArrayList<>();
-        boolean updated = false;
-
-        // Read all courses
-        try (BufferedReader br = new BufferedReader(new FileReader(courseFilePath))) {
+    public List<Student> getAllStudents() {
+        List<Student> students = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(enrollmentFilePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] tokens = line.split("\\|");
-                if (tokens.length >= 6) {
-                    if (tokens[0].equals(updatedCourse.getCourseId())) {
-                        // Replace with updated course
-                        allCourses.add(updatedCourse);
-                        updated = true;
-                    } else {
-                        // Keep existing course
-                        allCourses.add(new Course(
-                                tokens[0], tokens[1], tokens[2],
-                                tokens[3], tokens[4], tokens[5]));
+                try {
+                    String[] tokens = line.split(",");
+                    if (tokens.length >= 12) {
+                        LocalDateTime createdAt = LocalDateTime.parse(tokens[4], formatter);
+                        Student student = new Student(
+                                tokens[5],  // firstName
+                                tokens[6],  // lastName
+                                tokens[7],  // dateOfBirth
+                                tokens[8],  // gender
+                                tokens[9],  // nationality
+                                tokens[10], // email
+                                tokens[11], // password
+                                tokens[0],  // id
+                                tokens[1],  // contactNumber
+                                tokens[2],  // school
+                                tokens[3],  // grade
+                                createdAt   // createdAt
+                        );
+                        students.add(student);
                     }
+                } catch (Exception e) {
+                    System.err.println("Error parsing student record: " + line);
+                    e.printStackTrace();
                 }
             }
+            // Sort students by join date
+            InsertionSortUtil.sortStudentsByJoinDate(students);
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
-
-        // Write all courses back
-        if (updated) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(courseFilePath))) {
-                for (Course course : allCourses) {
-                    bw.write(String.join("|",
-                            course.getCourseId(),
-                            course.getTitle(),
-                            course.getDescription() != null ? course.getDescription() : "",
-                            course.getStartDate() != null ? course.getStartDate() : "",
-                            course.getEndDate() != null ? course.getEndDate() : "",
-                            course.getInstructorEmail() != null ? course.getInstructorEmail() : ""));
-                    bw.newLine();
-                }
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
+        return students;
     }
-
 }

@@ -46,10 +46,6 @@
             <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">Login</button>
         </div>
     </form>
-    <p class="mt-6 text-sm text-center text-gray-600">
-        Don't have an account?
-        <a href="instructorSignup.jsp" class="text-indigo-600 hover:underline font-medium">Sign up here</a>
-    </p>
 </div>
 
 <script>

@@ -2,10 +2,8 @@ package com.app.course.instructor.instructor.controller;
 
 import com.app.course.instructor.instructor.dao.InstructorDAO;
 import com.app.course.instructor.instructor.model.Instructor;
-
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-
 import java.io.*;
 
 @WebServlet("/instructorLogin")

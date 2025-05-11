@@ -45,34 +45,6 @@ public class InstructorDAO {
         return null;
     }
 
-    public boolean registerInstructor(Instructor instructor) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(instructor.getFirstName()).append(",")
-                    .append(instructor.getLastName()).append(",")
-                    .append(instructor.getDob()).append(",")
-                    .append(instructor.getGender()).append(",")
-                    .append(instructor.getNationality()).append(",")
-                    .append(instructor.getNic()).append(",")
-                    .append(instructor.getProfilePicture()).append(",")
-                    .append(instructor.getPhone()).append(",")
-                    .append(instructor.getQualification()).append(",")
-                    .append(instructor.getSpecialization()).append(",")
-                    .append(instructor.getExperience()).append(",")
-                    .append(instructor.getDepartment()).append(",")
-                    .append(instructor.getDesignation()).append(",")
-                    .append(instructor.getEmail()).append(",")
-                    .append(instructor.getPassword());
-
-            bw.write(sb.toString());
-            bw.newLine();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public boolean updateInstructor(Instructor updatedInstructor) {
         List<Instructor> instructors = new ArrayList<>();
         boolean found = false;
@@ -87,8 +59,11 @@ public class InstructorDAO {
                         instructors.add(updatedInstructor);
                         found = true;
                     } else {
-                        Instructor instructor = new Instructor();
-                        // ... populate existing instructor from parts array ...
+                        Instructor instructor = new Instructor(
+                                parts[0], parts[1], parts[2], parts[3], parts[4], parts[5],
+                                parts[6], parts[7], parts[8], parts[9], Integer.parseInt(parts[10]),
+                                parts[11], parts[12], parts[13], parts[14]
+                        );
                         instructors.add(instructor);
                     }
                 }
@@ -99,64 +74,6 @@ public class InstructorDAO {
         }
 
         // Write back all instructors
-        if (found) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-                for (Instructor instructor : instructors) {
-                    bw.write(String.join(",",
-                            instructor.getFirstName(),
-                            instructor.getLastName(),
-                            instructor.getDob(),
-                            instructor.getGender(),
-                            instructor.getNationality(),
-                            instructor.getNic(),
-                            instructor.getProfilePicture(),
-                            instructor.getPhone(),
-                            instructor.getQualification(),
-                            instructor.getSpecialization(),
-                            String.valueOf(instructor.getExperience()),
-                            instructor.getDepartment(),
-                            instructor.getDesignation(),
-                            instructor.getEmail(),
-                            instructor.getPassword()));
-                    bw.newLine();
-                }
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
-    public boolean deleteInstructor(String email) {
-        List<Instructor> instructors = new ArrayList<>();
-        boolean found = false;
-
-        // Read all instructors
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 15) {
-                    if (!parts[13].equalsIgnoreCase(email)) {
-                        // Reconstruct instructor properly
-                        Instructor instructor = new Instructor(
-                                parts[0], parts[1], parts[2], parts[3], parts[4], parts[5],
-                                parts[6], parts[7], parts[8], parts[9], Integer.parseInt(parts[10]),
-                                parts[11], parts[12], parts[13], parts[14]
-                        );
-                        instructors.add(instructor);
-                    } else {
-                        found = true;
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        // Write back remaining instructors
         if (found) {
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
                 for (Instructor instructor : instructors) {
@@ -201,4 +118,3 @@ public class InstructorDAO {
         return false;
     }
 }
-
